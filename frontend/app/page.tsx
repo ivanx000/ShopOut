@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 
 export default function Home() {
   const [goal, setGoal] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
   const router = useRouter();
   const placeholders = [
-    "to feel back in control of my days.",
-    "to get back into creative habits.",
-    "my carry-on to actually work for me.",
+    "to feel more settled in my apartment in Toronto",
+    "to get back into creative habits",
+    "to host the best dinner parties",
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -39,16 +40,16 @@ export default function Home() {
         {/* Background Video (optional, add your <video> here) */}
 
         {/* Page Title */}
-        <div className="text-7xl lg:text-8xl text-center">
-          Shop for outcomes
+        <div className="text-7xl lg:text-8xl text-center text-gray-100">
+          Shop for <br></br>Outcomes!
         </div>
 
         {/* Search Bar */}
-        <div className="flex mt-10 w-110 lg:w-200 relative">
+        <div className="text-m flex mt-10 w-110 lg:w-200 relative">
           {/* Input wrapper */}
           <div className="relative flex-1">
             {/* Static prefix */}
-            <span className="absolute left-4 mt-4 lg:mt-4.5 text-gray-400 pointer-events-none">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
               I want…
             </span>
 
@@ -57,14 +58,16 @@ export default function Home() {
               type="text"
               value={goal}
               onChange={(e) => setGoal(e.target.value)}
-              className="text-sm lg:text-lg w-full pl-20 px-4 py-4 rounded-lg border bg-gray-100 border-gray-300 focus:outline-none"
-              placeholder="" // leave empty, we use span for animation
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              className="text-sm lg:text-lg w-full pl-20 px-4 py-4 text-gray-400 rounded-lg border bg-gray-100 border-gray-300 focus:outline-none"
+              placeholder=""
             />
 
             {/* Animated fading placeholder after static prefix */}
-            {!goal && (
+            {!goal && !isFocused && (
               <span
-                className={`absolute left-20 mt-4 lg:mt-4.5 text-gray-400 pointer-events-none transition-opacity duration-500 ${
+                className={`absolute left-20 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none transition-opacity duration-500 ${
                   fade ? "opacity-100" : "opacity-0"
                 }`}
               >
@@ -77,7 +80,7 @@ export default function Home() {
           <button
             onClick={goToLoadingPage}
             disabled={goal.trim() === ""}
-            className="ml-2 lg:ml-5 w-15 lg:w-20 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg disabled:opacity-50"
+            className="ml-2 lg:ml-5 w-15 lg:w-20 bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-lg disabled:opacity-50 disabled:text-gray-600"
           >
             Go
           </button>

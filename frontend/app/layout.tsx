@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Anonymous_Pro } from "next/font/google";
+
+const anonymousPro = Anonymous_Pro({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-anonymous-pro",
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,8 +32,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        style={{ maxHeight: "100vh" }}
+        className={`${anonymousPro.className} antialiased`}
+        style={{ maxHeight: "150%" }}
       >
         {children}
         <video
