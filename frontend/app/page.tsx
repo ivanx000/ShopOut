@@ -14,8 +14,10 @@ export default function Home() {
   return (
     <>
       <div className="min-h-screen flex flex-col items-center justify-center mr-2 ml-2">
+        {/* Background Video */}
+
         <div className="text-7xl lg:text-8xl text-center">
-          What do you want to achieve?
+          Shop for outcomes
         </div>
 
         <div className="flex mt-10">
@@ -23,8 +25,8 @@ export default function Home() {
             type="text"
             value={goal}
             onChange={(e) => setGoal(e.target.value)}
-            placeholder="I just moved to Toronto and need to feel settled.."
-            className="text-sm lg:text-lg w-100 lg:w-200 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
+            placeholder="I want to.."
+            className="text-sm lg:text-lg w-100 lg:w-200 px-4 py-3 rounded-lg border bg-gray-100 border-gray-300 focus:outline-none"
           />
 
           <button
