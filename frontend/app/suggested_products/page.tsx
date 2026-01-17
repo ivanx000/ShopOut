@@ -74,7 +74,7 @@ export default function SuggestionsPage() {
     setExpandedProduct(index);
 
     try {
-      const results = await searchProducts(productName, 10);
+      const results = await searchProducts(productName, 6);
       setSearchResults(prev => ({ ...prev, [index]: results.products }));
     } catch (error) {
       console.error("Error searching products:", error);

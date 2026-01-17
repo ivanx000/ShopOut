@@ -139,11 +139,14 @@ async def search_products(request: ProductSearchRequest):
             use_cache=True
         )
         
+        # Limit results to the requested max (in case platforms return more)
+        limited_results = results[:request.max_results]
+        
         return {
             "success": True,
             "search_term": request.product_name,
-            "total_results": len(results),
-            "products": results
+            "total_results": len(limited_results),
+            "products": limited_results
         }
         
     except Exception as e:
