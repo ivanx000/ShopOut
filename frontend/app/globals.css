@@ -19,6 +19,17 @@
   }
 }
 
+/* styles/globals.css or component CSS module */
+@keyframes bob {
+  0%   { transform: translateY(0px); }
+  50%  { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.bob {
+  animation: bob 4.0s ease-in-out infinite;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

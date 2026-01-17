@@ -20,31 +20,41 @@ export default function LoadingPage() {
         console.log("Fetching recommendations for:", goal);
         const data = await getRecommendations(goal);
         console.log("Received data:", data);
-        
+
         // Verify data structure
-        if (!data || !data.vibe_analysis || !data.products || !Array.isArray(data.products)) {
+        if (
+          !data ||
+          !data.vibe_analysis ||
+          !data.products ||
+          !Array.isArray(data.products)
+        ) {
           console.error("Invalid data structure received:", data);
           setError("Invalid response format from server");
           return;
         }
-        
+
         // Store results in localStorage to pass to results page
         localStorage.setItem("recommendations", JSON.stringify(data));
         localStorage.setItem("originalGoal", goal);
-        
+
         // Verify it was stored
         const verify = localStorage.getItem("recommendations");
-        console.log("Data stored in localStorage, verification:", verify ? "success" : "failed");
+        console.log(
+          "Data stored in localStorage, verification:",
+          verify ? "success" : "failed",
+        );
         console.log("Stored data preview:", verify?.substring(0, 100));
-        
+
         // Small delay to ensure localStorage is written, then redirect
         setTimeout(() => {
-          console.log("Redirecting to suggested_products");
-          router.push("/suggested_products");
+          console.log("Redirecting to prompt_results");
+          router.push("/prompt_results");
         }, 100);
       } catch (err) {
         console.error("Error fetching recommendations:", err);
-        setError(err instanceof Error ? err.message : "Failed to get recommendations");
+        setError(
+          err instanceof Error ? err.message : "Failed to get recommendations",
+        );
       }
     };
 
