@@ -60,28 +60,29 @@ function Scene({
   selectedIndex: number | null;
   onProductClick: (index: number) => void;
 }) {
+  // Scattered positions for models (same z-depth for consistency)
   const positions: [number, number, number][] = [
-    [-3, 0, 0],
-    [-1, 0, 0],
-    [1, 0, 0],
-    [3, 0, 0],
-    [0, -2, 0],
+    [-4, 1, 0],
+    [2, -1.5, 0],
+    [-1, 2, 0],
+    [3.5, 0.5, 0],
+    [-2.5, -1, 0],
   ];
 
   return (
-    <Canvas camera={{ position: selectedIndex !== null ? [-1, 0, 5] : [0, 0, 8], fov: selectedIndex !== null ? 60 : 50 }}>
+    <Canvas camera={{ position: selectedIndex !== null ? [0, 0, 6] : [0, 0, 10], fov: selectedIndex !== null ? 50 : 50 }}>
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 5]} intensity={1} />
       <pointLight position={[-10, -10, -5]} intensity={0.5} />
       
       {products.slice(0, 5).map((product, index) => {
-        // Always render all boxes, but position selected one on the left
+        // Always render all boxes, but position selected one in center
         const isSelected = selectedIndex === index;
         const position: [number, number, number] = isSelected 
-          ? [-1, 0, 0]  // Move to left side when selected, more centered
+          ? [0, 0, 0]  // Center position when selected
           : selectedIndex !== null 
             ? [10, 10, 10] // Hide other boxes far away when one is selected
-            : positions[index]; // Original position when nothing selected
+            : positions[index]; // Scattered position when nothing selected
         
         return (
           <ProductBox
@@ -162,76 +163,170 @@ function ThreeDDemoContent() {
 
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
-      {/* Header */}
-      <div className="absolute top-4 left-4 z-10">
-        <button
-          onClick={() => router.push("/")}
-          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg text-white"
-        >
-          ← Back to Home
-        </button>
-      </div>
-
+      {/* Header - Only show when no product is selected */}
+      {selectedProductIndex === null && (
+        <div className="absolute top-4 right-4 z-10">
+          <button
+            onClick={() => router.push("/")}
+            className="px-4 py-2 bg-gray-800 hover:bg-gray-900 rounded-lg text-white"
+          >
+            ← Back to Home
+          </button>
+        </div>
+      )}
 
       {/* Main Content - Window Layout */}
       <div className="h-screen flex items-center justify-center p-8">
-        <div className={`w-full max-w-7xl h-full transition-all duration-300 ${selectedProductIndex !== null ? 'border-4 border-gray-300 rounded-lg shadow-2xl' : 'border-0'} bg-white overflow-hidden`}>
+        <div className={`w-full max-w-7xl h-full transition-all duration-300 ${selectedProductIndex !== null ? 'border-2 border-gray-200 rounded-2xl shadow-xl' : 'border-0'} bg-white overflow-hidden`}>
           <div className="flex h-full">
-            {/* Left Side - 3D Scene */}
-            <div className={`transition-all duration-500 ${selectedProductIndex !== null ? 'w-1/2 border-r-4 border-gray-300' : 'w-full'}`}>
-              <div className="h-full">
-                <Suspense fallback={
-                  <div className="h-full flex items-center justify-center">
-                    <div className="text-2xl text-gray-900">Loading 3D scene...</div>
+            {/* Left Side - 3D Scene or Product Detail */}
+            <div className={`transition-all duration-500 ${selectedProductIndex !== null ? 'w-1/3 border-r-2 border-gray-200' : 'w-full'}`}>
+              {selectedProductDetail ? (
+                // Product Detail View
+                <div className="h-full flex items-center justify-center p-4 relative bg-white">
+                  <button
+                    onClick={() => setSelectedProductDetail(null)}
+                    className="absolute top-4 right-4 text-white bg-gray-800 hover:bg-gray-900 text-xl font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-lg transition-all hover:scale-110 z-10"
+                  >
+                    ✕
+                  </button>
+                  
+                  <div className="flex flex-col items-center w-full h-full justify-center px-6">
+                    {selectedProductDetail.image && (
+                      <img
+                        src={selectedProductDetail.image}
+                        alt={selectedProductDetail.title}
+                        className="w-full max-h-[50%] object-contain rounded-lg mb-4"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    )}
+                    <h2 className="font-bold text-xl mb-3 text-gray-900 text-center line-clamp-2">{selectedProductDetail.title}</h2>
+                    <p className="text-gray-900 font-bold text-3xl mb-4">
+                      ${selectedProductDetail.price.toFixed(2)}
+                    </p>
+                    
+                    <div className="space-y-2 mb-4 w-full">
+                      {selectedProductDetail.platform && (
+                        <p className="text-gray-600 text-base text-center">
+                          <span className="font-medium">Platform:</span> {selectedProductDetail.platform}
+                        </p>
+                      )}
+                      {selectedProductDetail.rating && (
+                        <div className="flex items-center justify-center gap-2 text-base">
+                          <span className="text-gray-600 font-medium">Rating: {selectedProductDetail.rating}</span>
+                          <span className="flex items-center text-xl">
+                            {(() => {
+                              const ratingNum = parseFloat(selectedProductDetail.rating);
+                              const stars = [];
+                              for (let i = 1; i <= 5; i++) {
+                                stars.push(
+                                  <span key={i} className={i <= Math.floor(ratingNum) ? "text-yellow-500" : "text-gray-300"}>
+                                    ★
+                                  </span>
+                                );
+                              }
+                              return stars;
+                            })()}
+                          </span>
+                        </div>
+                      )}
+                      {selectedProductDetail.condition && (
+                        <p className="text-gray-600 text-base text-center">
+                          <span className="font-medium">Condition:</span> {selectedProductDetail.condition}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <a
+                      href={selectedProductDetail.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full max-w-sm text-center px-6 py-3 bg-gray-800 hover:bg-gray-900 text-white rounded-lg font-semibold transition-colors text-base"
+                    >
+                      View Product →
+                    </a>
                   </div>
-                }>
-                  <Scene
-                    products={data.products}
-                    selectedIndex={selectedProductIndex}
-                    onProductClick={handleProductClick}
-                  />
-                </Suspense>
-              </div>
+                </div>
+              ) : (
+                // 3D Scene
+                <div className="h-full">
+                  <Suspense fallback={
+                    <div className="h-full flex items-center justify-center">
+                      <div className="text-2xl text-gray-900">Loading 3D scene...</div>
+                    </div>
+                  }>
+                    <Scene
+                      products={data.products}
+                      selectedIndex={selectedProductIndex}
+                      onProductClick={handleProductClick}
+                    />
+                  </Suspense>
+                </div>
+              )}
             </div>
 
             {/* Right Side - Product Grid (Horizontal) */}
             {selectedProductIndex !== null && (
-              <div className="w-1/2 bg-white p-6 overflow-y-auto">
-                <h3 className="text-2xl font-bold mb-4 text-gray-900">
-                  Products for: {data.products[selectedProductIndex].name}
-                </h3>
+              <div className="w-2/3 bg-white p-6 flex flex-col h-full">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">
+                    {data.products[selectedProductIndex].name}
+                  </h3>
+                  <button
+                    onClick={() => {
+                      setSelectedProductIndex(null);
+                      setSearchResults([]);
+                      setSelectedProductDetail(null);
+                    }}
+                    className="px-4 py-2 bg-gray-800 hover:bg-gray-900 rounded-lg text-white font-medium"
+                  >
+                    ← Back
+                  </button>
+                </div>
                 
                 {loadingProducts ? (
-                  <div className="flex items-center justify-center h-64">
+                  <div className="flex items-center justify-center flex-1">
                     <div className="text-xl text-gray-700">Searching for products...</div>
                   </div>
                 ) : searchResults.length > 0 ? (
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-3 gap-3 h-full">
                     {searchResults.map((product, index) => (
-                      <div
-                        key={index}
-                        onClick={() => setSelectedProductDetail(product)}
-                        className="bg-gray-100 rounded-lg p-3 cursor-pointer hover:bg-gray-200 transition-colors border border-gray-300"
-                      >
-                        {product.image && (
-                          <img
-                            src={product.image}
-                            alt={product.title}
-                            className="w-full h-24 object-cover rounded mb-2"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
-                        )}
-                        <h4 className="font-semibold text-xs mb-1 line-clamp-2 text-gray-900">{product.title}</h4>
-                        <p className="text-blue-600 font-bold text-sm">
-                          ${product.price.toFixed(2)} {product.currency}
-                        </p>
-                      </div>
+                      selectedProductDetail?.url === product.url ? (
+                        // Placeholder for selected product
+                        <div
+                          key={index}
+                          className="bg-white rounded-lg p-3 border-2 border-gray-300 border-dashed flex items-center justify-center"
+                        >
+                          <p className="text-gray-400 text-xs text-center">Viewing</p>
+                        </div>
+                      ) : (
+                        <div
+                          key={index}
+                          onClick={() => setSelectedProductDetail(product)}
+                          className="bg-gray-50 rounded-lg p-3 cursor-pointer hover:shadow-lg hover:scale-105 transition-all border border-gray-200 flex flex-col h-full"
+                        >
+                          {product.image && (
+                            <img
+                              src={product.image}
+                              alt={product.title}
+                              className="w-full h-32 object-cover rounded-lg mb-2"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          )}
+                          <h4 className="font-semibold text-xs mb-2 line-clamp-2 text-gray-900 flex-1">{product.title}</h4>
+                          <p className="text-blue-600 font-bold text-sm">
+                            ${product.price.toFixed(2)}
+                          </p>
+                        </div>
+                      )
                     ))}
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center h-64">
+                  <div className="flex items-center justify-center flex-1">
                     <p className="text-gray-600">No products found</p>
                   </div>
                 )}
@@ -240,59 +335,6 @@ function ThreeDDemoContent() {
           </div>
         </div>
       </div>
-
-      {/* Product Detail Modal */}
-      {selectedProductDetail && (
-        <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 relative border-4 border-gray-300 shadow-2xl">
-            <button
-              onClick={() => setSelectedProductDetail(null)}
-              className="absolute top-4 right-4 text-gray-600 hover:text-gray-900 text-3xl font-bold"
-            >
-              ×
-            </button>
-            
-            {selectedProductDetail.image && (
-              <img
-                src={selectedProductDetail.image}
-                alt={selectedProductDetail.title}
-                className="w-full h-64 object-cover rounded mb-4 border-2 border-gray-300"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            )}
-            
-            <h2 className="text-3xl font-bold mb-2 text-gray-900">{selectedProductDetail.title}</h2>
-            
-            <div className="flex items-center gap-4 mb-4">
-              <span className="text-2xl font-bold text-green-600">
-                ${selectedProductDetail.price.toFixed(2)} {selectedProductDetail.currency}
-              </span>
-              <span className="px-3 py-1 bg-blue-500 text-white rounded text-sm">
-                {selectedProductDetail.platform}
-              </span>
-            </div>
-            
-            {selectedProductDetail.rating && (
-              <p className="text-yellow-600 mb-2">⭐ {selectedProductDetail.rating}</p>
-            )}
-            
-            {selectedProductDetail.condition && (
-              <p className="text-gray-600 mb-2">Condition: {selectedProductDetail.condition}</p>
-            )}
-            
-            <a
-              href={selectedProductDetail.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block mt-4 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-center font-semibold"
-            >
-              View on {selectedProductDetail.platform} →
-            </a>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
