@@ -63,11 +63,11 @@ function Scene({
 }) {
   // Scattered positions for models (same z-depth for consistency)
   const positions: [number, number, number][] = [
-    [-4, 1, 0],
-    [2, -1.5, 0],
-    [-1, 2, 0],
-    [3.5, 0.5, 0],
-    [-2.5, -1, 0],
+    [-6, 2, 0],
+    [3.5, -2.5, 0],
+    [-2, 3.5, 0],
+    [5.5, 1.5, 0],
+    [-4, -2, 0],
   ];
 
   const colors = ["#ff6b6b", "#4ecdc4", "#45b7d1", "#f9ca24", "#6c5ce7"];
@@ -75,8 +75,8 @@ function Scene({
   // Map product names to their model files
   const modelFiles = ["candle.obj", "diffuser.obj", "journal.obj", "pillow.obj", "tea.obj"];
   
-  // Adjust scales for each model
-  const scales = [0.007, 0.005, 0.0060, 0.002, 0.005]; // candle, diffuser, journal, pillow, tea  
+  // Adjust scales for each model - larger fixed sizes
+  const scales = [0.020, 0.016, 0.018, 0.006, 0.016]; // candle, diffuser, journal, pillow, tea  
   // Adjust offsets to center rotation for each model [x, y, z]
   const offsets: [number, number, number][] = [
     [0, 0, 0],     // candle
@@ -86,7 +86,12 @@ function Scene({
     [0, 0, 0],     // tea
   ];
   return (
-    <Canvas camera={{ position: selectedIndex !== null ? [0, 0, 6] : [0, 0, 10], fov: selectedIndex !== null ? 50 : 50 }}>
+    <Canvas 
+      key={`canvas-${selectedIndex}`}
+      camera={{ position: selectedIndex !== null ? [0, 0, 6] : [0, 0, 12], fov: selectedIndex !== null ? 50 : 50 }}
+      gl={{ alpha: true }}
+      style={{ background: 'transparent' }}
+    >
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 5]} intensity={1} />
       <pointLight position={[-10, -10, -5]} intensity={0.5} />
@@ -175,14 +180,14 @@ function ThreeDDemoContent() {
 
   if (!data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-2xl text-gray-900">Loading recommendations...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden">
       {/* Header - Only show when no product is selected */}
       {selectedProductIndex === null && (
         <div className="absolute top-4 right-4 z-10">
@@ -197,13 +202,13 @@ function ThreeDDemoContent() {
 
       {/* Main Content - Window Layout */}
       <div className="h-screen flex items-center justify-center p-8">
-        <div className={`w-full max-w-7xl h-full transition-all duration-300 ${selectedProductIndex !== null ? 'border-2 border-gray-200 rounded-2xl shadow-xl' : 'border-0'} bg-white overflow-hidden`}>
+        <div className={`w-full max-w-7xl h-full transition-all duration-300 ${selectedProductIndex !== null ? 'border-2 border-gray-200 rounded-2xl shadow-xl bg-white/80 backdrop-blur-sm' : 'border-0'} overflow-hidden`}>
           <div className="flex h-full">
             {/* Left Side - 3D Scene or Product Detail */}
-            <div className={`transition-all duration-500 ${selectedProductIndex !== null ? 'w-1/3 border-r-2 border-gray-200' : 'w-full'}`}>
+            <div className={`transition-all duration-500 ${selectedProductIndex !== null ? 'w-1/3 border-r-2 border-gray-200' : 'w-full'} bg-transparent`}>
               {selectedProductDetail ? (
                 // Product Detail View
-                <div className="h-full flex items-center justify-center p-4 relative bg-white">
+                <div className="h-full flex items-center justify-center p-4 relative bg-transparent">
                   <button
                     onClick={() => setSelectedProductDetail(null)}
                     className="absolute top-4 right-4 text-white bg-gray-800 hover:bg-gray-900 text-xl font-bold w-10 h-10 flex items-center justify-center rounded-full shadow-lg transition-all hover:scale-110 z-10"
@@ -270,26 +275,28 @@ function ThreeDDemoContent() {
                   </div>
                 </div>
               ) : (
-                // 3D Scene
+                // 3D Scene - Only render when no product detail is shown
                 <div className="h-full">
-                  <Suspense fallback={
-                    <div className="h-full flex items-center justify-center">
-                      <div className="text-2xl text-gray-900">Loading 3D scene...</div>
-                    </div>
-                  }>
-                    <Scene
-                      products={data.products}
-                      selectedIndex={selectedProductIndex}
-                      onProductClick={handleProductClick}
-                    />
-                  </Suspense>
+                  {!selectedProductDetail && (
+                    <Suspense fallback={
+                      <div className="h-full flex items-center justify-center">
+                        <div className="text-2xl text-gray-900">Loading 3D scene...</div>
+                      </div>
+                    }>
+                      <Scene
+                        products={data.products}
+                        selectedIndex={selectedProductIndex}
+                        onProductClick={handleProductClick}
+                      />
+                    </Suspense>
+                  )}
                 </div>
               )}
             </div>
 
             {/* Right Side - Product Grid (Horizontal) */}
             {selectedProductIndex !== null && (
-              <div className="w-2/3 bg-white p-6 flex flex-col h-full">
+              <div className="w-2/3 bg-transparent p-6 flex flex-col h-full">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl font-bold text-gray-900">
                     {data.products[selectedProductIndex].name}

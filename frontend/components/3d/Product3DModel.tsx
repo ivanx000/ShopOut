@@ -83,7 +83,7 @@ export default function Product3DModel({
     <group
       ref={groupRef}
       position={position}
-      scale={hovered ? scale * 1.2 : scale}
+      scale={scale}
       onClick={handleClick}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
