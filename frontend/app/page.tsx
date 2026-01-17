@@ -6,15 +6,17 @@ export default function Home() {
   const [goal, setGoal] = useState("");
   const router = useRouter();
 
-  const goToLoadingPage = () => {
+  const goToPromptResults = () => {
     if (goal.trim() === "") return; // extra safety
-    router.push(`/loading_page?goal=${encodeURIComponent(goal)}`);
+    router.push(`/prompt_results?goal=${encodeURIComponent(goal)}`);
   };
 
   return (
     <>
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <div className="text-8xl text-center">What do you want to achieve?</div>
+      <div className="min-h-screen flex flex-col items-center justify-center mr-2 ml-2">
+        <div className="text-7xl lg:text-8xl text-center">
+          What do you want to achieve?
+        </div>
 
         <div className="flex mt-10">
           <input
@@ -26,7 +28,7 @@ export default function Home() {
           />
 
           <button
-            onClick={goToLoadingPage}
+            onClick={goToPromptResults}
             disabled={goal.trim() === ""}
             className="w-15 lg:w-20 ml-2 lg:ml-5 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg
             disabled:opacity-50"
