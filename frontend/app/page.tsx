@@ -6,9 +6,9 @@ export default function Home() {
   const [goal, setGoal] = useState("");
   const router = useRouter();
 
-  const goToLoadingPage = () => {
+  const goTo3DDemo = () => {
     if (goal.trim() === "") return; // extra safety
-    router.push(`/loading_page?goal=${encodeURIComponent(goal)}`);
+    router.push(`/3d-demo?goal=${encodeURIComponent(goal)}`);
   };
 
   return (
@@ -30,7 +30,7 @@ export default function Home() {
           />
 
           <button
-            onClick={goToLoadingPage}
+            onClick={goTo3DDemo}
             disabled={goal.trim() === ""}
             className="w-15 lg:w-20 ml-2 lg:ml-5 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg
             disabled:opacity-50"

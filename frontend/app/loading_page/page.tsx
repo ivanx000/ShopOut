@@ -66,8 +66,8 @@ function LoadingPageContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-4xl">
-        <div className="text-red-500 mb-4">Error: {error}</div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+        <div className="text-red-500 mb-4 text-4xl">Error: {error}</div>
         <button
           onClick={() => router.push("/")}
           className="mt-4 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
@@ -79,10 +79,10 @@ function LoadingPageContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center text-4xl">
+    <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="text-center">
-        <div className="animate-pulse">Loading recommendations...</div>
-        <div className="mt-4 text-lg text-gray-500">Analyzing your vibe...</div>
+        <div className="animate-pulse text-4xl text-gray-900">Loading recommendations...</div>
+        <div className="mt-4 text-lg text-gray-600">Analyzing your vibe...</div>
       </div>
     </div>
   );
@@ -91,8 +91,8 @@ function LoadingPageContent() {
 export default function LoadingPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center text-4xl">
-        <div className="animate-pulse">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="animate-pulse text-4xl text-gray-900">Loading...</div>
       </div>
     }>
       <LoadingPageContent />
