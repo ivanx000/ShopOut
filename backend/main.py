@@ -5,6 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import google.generativeai as genai
 from dotenv import load_dotenv
+from product_search import ProductSearchAggregator
+from typing import List, Dict
 
 # 1. Load Environment Variables
 load_dotenv()
@@ -39,6 +41,13 @@ class VibeRequest(BaseModel):
 @app.get("/")
 async def root():
     return {"message": "Vibe API is online"}
+
+class ProductSearchRequest(BaseModel):
+    prompt: str
+    max_results: int = 10
+
+# Initialize product search aggregator
+product_searcher = ProductSearchAggregator(cache_dir="cache", cache_hours=24)
 
 @app.post("/recommend")
 async def get_recommendations(request: VibeRequest):
@@ -110,3 +119,52 @@ async def get_recommendations(request: VibeRequest):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+@app.post("/search-products")
+async def search_products(request: ProductSearchRequest):
+    """
+    Search for products across multiple platforms based on a natural language prompt.
+    Uses Gemini AI to extract product keywords from the prompt, then searches across
+    eBay, Amazon, and Google Shopping.
+    """
+    try:
+        # Use Gemini to extract search keywords from the prompt
+        model = genai.GenerativeModel('gemini-3-flash-preview')
+        extraction_prompt = f"""
+        Extract the most relevant product search keyword from this user prompt: '{request.prompt}'
+        Return ONLY the keyword or short phrase (2-4 words max) that would work best for a product search.
+        Do not include any explanation or extra text.
+        """
+        
+        keyword_response = model.generate_content(extraction_prompt)
+        search_keyword = keyword_response.text.strip().strip('"').strip("'")
+        
+        print(f"🔍 Searching for: {search_keyword}")
+        
+        # Search across platforms
+        results = product_searcher.search_all(
+            keyword=search_keyword,
+            max_results=request.max_results,
+            use_cache=True
+        )
+        
+        return {
+            "success": True,
+            "keyword": search_keyword,
+            "total_results": len(results),
+            "products": results
+        }
+        
+    except Exception as e:
+        print(f"Error in search_products: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/")
+async def root():
+    return {
+        "message": "Product Search API",
+        "endpoints": {
+            "/recommend": "POST - Get product recommendations based on vibe",
+            "/search-products": "POST - Search products across platforms based on prompt"
+        }
+    }
