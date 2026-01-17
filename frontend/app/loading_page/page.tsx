@@ -1,19 +1,22 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getRecommendations } from "@/lib/api";
 
-export default function LoadingPage() {
+function LoadingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
+  const hasStartedFetch = useRef(false);
   const goal = searchParams.get("goal");
 
   useEffect(() => {
-    if (!goal) {
-      router.push("/");
+    // Prevent multiple fetches
+    if (!goal || hasStartedFetch.current) {
       return;
     }
+
+    hasStartedFetch.current = true;
 
     const fetchRecommendations = async () => {
       try {
@@ -59,7 +62,7 @@ export default function LoadingPage() {
     };
 
     fetchRecommendations();
-  }, [goal, router]);
+  }, [goal]); // Removed router from dependencies
 
   if (error) {
     return (
@@ -82,5 +85,17 @@ export default function LoadingPage() {
         <div className="mt-4 text-lg text-gray-500">Analyzing your vibe...</div>
       </div>
     </div>
+  );
+}
+
+export default function LoadingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center text-4xl">
+        <div className="animate-pulse">Loading...</div>
+      </div>
+    }>
+      <LoadingPageContent />
+    </Suspense>
   );
 }
