@@ -1,30 +1,88 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { RecommendationResponse } from "@/lib/api";
+import { RecommendationResponse, searchProducts, SearchProduct } from "@/lib/api";
 
 export default function SuggestionsPage() {
   const router = useRouter();
   const [data, setData] = useState<RecommendationResponse | null>(null);
   const [goal, setGoal] = useState<string>("");
+  const [expandedProduct, setExpandedProduct] = useState<number | null>(null);
+  const [searchResults, setSearchResults] = useState<Record<number, SearchProduct[]>>({});
+  const [loadingProducts, setLoadingProducts] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
-    // Get data from localStorage
-    const storedData = localStorage.getItem("recommendations");
-    const storedGoal = localStorage.getItem("originalGoal");
+    // Small delay to ensure localStorage is available (in case of race condition)
+    const timer = setTimeout(() => {
+      // Get data from localStorage
+      const storedData = localStorage.getItem("recommendations");
+      const storedGoal = localStorage.getItem("originalGoal");
 
-    if (!storedData || !storedGoal) {
-      router.push("/");
+      console.log("Suggested products page - storedData:", storedData ? "exists" : "missing");
+      console.log("Suggested products page - storedGoal:", storedGoal);
+      if (storedData) {
+        console.log("Stored data preview:", storedData.substring(0, 200));
+      }
+
+      if (!storedData || !storedGoal) {
+        console.log("No data found in localStorage, redirecting to home");
+        router.push("/");
+        return;
+      }
+
+      try {
+        const parsedData = JSON.parse(storedData);
+        console.log("Parsed data:", parsedData);
+        
+        // Validate data structure
+        if (!parsedData.vibe_analysis || !parsedData.products || !Array.isArray(parsedData.products)) {
+          console.error("Invalid data structure:", parsedData);
+          router.push("/");
+          return;
+        }
+        
+        setData(parsedData);
+        setGoal(storedGoal);
+
+        // Clean up localStorage after reading
+        localStorage.removeItem("recommendations");
+        localStorage.removeItem("originalGoal");
+      } catch (err) {
+        console.error("Error parsing stored data:", err);
+        router.push("/");
+      }
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, [router]);
+
+  const handleViewProducts = async (index: number, productName: string) => {
+    // If already expanded, collapse it
+    if (expandedProduct === index) {
+      setExpandedProduct(null);
       return;
     }
 
-    setData(JSON.parse(storedData));
-    setGoal(storedGoal);
+    // If we already have results for this product, just expand
+    if (searchResults[index]) {
+      setExpandedProduct(index);
+      return;
+    }
 
-    // Clean up localStorage after reading
-    localStorage.removeItem("recommendations");
-    localStorage.removeItem("originalGoal");
-  }, [router]);
+    // Otherwise, fetch products
+    setLoadingProducts(prev => ({ ...prev, [index]: true }));
+    setExpandedProduct(index);
+
+    try {
+      const results = await searchProducts(productName, 10);
+      setSearchResults(prev => ({ ...prev, [index]: results.products }));
+    } catch (error) {
+      console.error("Error searching products:", error);
+      setSearchResults(prev => ({ ...prev, [index]: [] }));
+    } finally {
+      setLoadingProducts(prev => ({ ...prev, [index]: false }));
+    }
+  };
 
   if (!data) {
     return (
@@ -65,7 +123,69 @@ export default function SuggestionsPage() {
                   {product.category}
                 </span>
               </div>
-              <p className="text-gray-600 mt-2">{product.reason}</p>
+              <p className="text-gray-600 mt-2 mb-4">{product.reason}</p>
+              
+              {/* Button to view actual products */}
+              <button
+                onClick={() => handleViewProducts(index, product.name)}
+                disabled={loadingProducts[index]}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loadingProducts[index] ? "Searching..." : expandedProduct === index ? "Hide Products" : "View Products"}
+              </button>
+
+              {/* Show actual products when expanded */}
+              {expandedProduct === index && searchResults[index] && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <h4 className="text-xl font-semibold mb-3">
+                    Found {searchResults[index].length} products for "{product.name}"
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {searchResults[index].map((item, itemIndex) => (
+                      <div
+                        key={itemIndex}
+                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                      >
+                        {item.image && (
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className="w-full h-48 object-cover rounded mb-2"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        )}
+                        <h5 className="font-semibold text-lg mb-1 line-clamp-2">{item.title}</h5>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xl font-bold text-green-600">
+                            ${item.price.toFixed(2)} {item.currency}
+                          </span>
+                          <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                            {item.platform}
+                          </span>
+                        </div>
+                        {item.rating && (
+                          <p className="text-sm text-gray-600 mb-2">⭐ {item.rating}</p>
+                        )}
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:text-blue-700 underline text-sm"
+                        >
+                          View on {item.platform} →
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                  {searchResults[index].length === 0 && (
+                    <p className="text-gray-500 text-center py-4">
+                      No products found. Try a different search term.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>

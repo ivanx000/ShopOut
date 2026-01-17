@@ -17,9 +17,10 @@ if not api_key:
 
 # 2. Configure Gemini
 genai.configure(api_key=api_key)
-# Use gemini-2.5-flash-lite
-model = genai.GenerativeModel('gemini-2.5-flash-lite')
-print("Using model: gemini-2.5-flash-lite")
+# Try different models to avoid rate limits
+# gemini-pro is the standard model with separate quota limits
+model = genai.GenerativeModel('gemini-2.5-flash')
+print("Using model: gemini-pro")
 
 app = FastAPI(title="Vibe-to-Product API")
 
@@ -40,11 +41,17 @@ class VibeRequest(BaseModel):
 
 @app.get("/")
 async def root():
-    return {"message": "Vibe API is online"}
+    return {
+        "message": "Vibe-to-Product API is online",
+        "endpoints": {
+            "/recommend": "POST - Get AI product recommendations based on vibe",
+            "/search-products": "POST - Search for specific products across platforms"
+        }
+    }
 
 class ProductSearchRequest(BaseModel):
-    prompt: str
-    max_results: int = 10
+    product_name: str = Field(..., min_length=1, description="Product name to search for")
+    max_results: int = Field(default=10, ge=1, le=50, description="Maximum number of results")
 
 # Initialize product search aggregator
 product_searcher = ProductSearchAggregator(cache_dir="cache", cache_hours=24)
@@ -116,55 +123,35 @@ async def get_recommendations(request: VibeRequest):
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"The AI failed to curate your vibe: {str(e)}")
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
 @app.post("/search-products")
 async def search_products(request: ProductSearchRequest):
     """
-    Search for products across multiple platforms based on a natural language prompt.
-    Uses Gemini AI to extract product keywords from the prompt, then searches across
-    eBay, Amazon, and Google Shopping.
+    Search for specific products across multiple platforms (eBay, Amazon, Google Shopping).
+    Returns actual products with prices, images, and links.
     """
     try:
-        # Use Gemini to extract search keywords from the prompt
-        model = genai.GenerativeModel('gemini-3-flash-preview')
-        extraction_prompt = f"""
-        Extract the most relevant product search keyword from this user prompt: '{request.prompt}'
-        Return ONLY the keyword or short phrase (2-4 words max) that would work best for a product search.
-        Do not include any explanation or extra text.
-        """
-        
-        keyword_response = model.generate_content(extraction_prompt)
-        search_keyword = keyword_response.text.strip().strip('"').strip("'")
-        
-        print(f"🔍 Searching for: {search_keyword}")
+        print(f"🔍 Searching for products: {request.product_name}")
         
         # Search across platforms
         results = product_searcher.search_all(
-            keyword=search_keyword,
+            keyword=request.product_name,
             max_results=request.max_results,
             use_cache=True
         )
         
         return {
             "success": True,
-            "keyword": search_keyword,
+            "search_term": request.product_name,
             "total_results": len(results),
             "products": results
         }
         
     except Exception as e:
         print(f"Error in search_products: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to search products: {str(e)}")
 
-@app.get("/")
-async def root():
-    return {
-        "message": "Product Search API",
-        "endpoints": {
-            "/recommend": "POST - Get product recommendations based on vibe",
-            "/search-products": "POST - Search products across platforms based on prompt"
-        }
-    }
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
