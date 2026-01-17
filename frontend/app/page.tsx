@@ -6,9 +6,9 @@ export default function Home() {
   const [goal, setGoal] = useState("");
   const router = useRouter();
 
-  const goToPromptResults = () => {
+  const goToLoadingPage = () => {
     if (goal.trim() === "") return; // extra safety
-    router.push(`/prompt_results?goal=${encodeURIComponent(goal)}`);
+    router.push(`/loading_page?goal=${encodeURIComponent(goal)}`);
   };
 
   return (
@@ -28,7 +28,7 @@ export default function Home() {
           />
 
           <button
-            onClick={goToPromptResults}
+            onClick={goToLoadingPage}
             disabled={goal.trim() === ""}
             className="w-15 lg:w-20 ml-2 lg:ml-5 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg
             disabled:opacity-50"
