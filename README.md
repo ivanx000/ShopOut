@@ -226,9 +226,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **UofTHacks 13** - University of Toronto Hackathon
 
 ## 👥 Contributing
-Ivan Xie \n
-Michael Salib
-Grace-Keyi Wang
-Zusheng Lu 
+Ivan Xie/
+Michael Salib, Grace-Keyi Wang ,Zusheng Lu 
 
 --
