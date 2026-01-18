@@ -17,11 +17,19 @@ function LoadingPageContent() {
     }
 
     hasStartedFetch.current = true;
+    let cancelled = false;
 
     const fetchRecommendations = async () => {
       try {
         console.log("Fetching recommendations for:", goal);
         const data = await getRecommendations(goal);
+        
+        // Check if component unmounted or effect cleaned up
+        if (cancelled) {
+          console.log("Request cancelled, ignoring response");
+          return;
+        }
+        
         console.log("Received data:", data);
 
         // Verify data structure
@@ -50,19 +58,28 @@ function LoadingPageContent() {
 
         // Small delay to ensure localStorage is written, then redirect
         setTimeout(() => {
-          console.log("Redirecting to prompt_results");
-          router.push("/prompt_results");
+          if (!cancelled) {
+            console.log("Redirecting to prompt_results");
+            router.push("/prompt_results");
+          }
         }, 100);
       } catch (err) {
-        console.error("Error fetching recommendations:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to get recommendations",
-        );
+        if (!cancelled) {
+          console.error("Error fetching recommendations:", err);
+          setError(
+            err instanceof Error ? err.message : "Failed to get recommendations",
+          );
+        }
       }
     };
 
     fetchRecommendations();
-  }, [goal]); // Removed router from dependencies
+    
+    // Cleanup function to prevent double execution in React Strict Mode
+    return () => {
+      cancelled = true;
+    };
+  }, [goal, router]);
 
   if (error) {
     return (
