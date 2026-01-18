@@ -22,6 +22,7 @@ export default function Home() {
 
   const [goal, setGoal] = useState(PREFIX);
   const [isFocused, setIsFocused] = useState(false);
+  const [userHasEdited, setUserHasEdited] = useState(false);
 
   const placeholders = [
     "feel more settled in my apartment in Toronto",
@@ -33,6 +34,9 @@ export default function Home() {
   const [fade, setFade] = useState(true);
 
   useEffect(() => {
+    // Only run animation if user hasn't edited
+    if (userHasEdited) return;
+
     const interval = setInterval(() => {
       setFade(false);
 
@@ -43,12 +47,13 @@ export default function Home() {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [userHasEdited]);
 
   const goTo3DDemo = () => {
-    if (goal.trim() === PREFIX.trim()) return;
+    const cleanedGoal = goal.replace(PREFIX, "").trim();
+    if (!cleanedGoal) return;
     router.push(
-      `/3d-demo?goal=${encodeURIComponent(goal.replace(PREFIX, ""))}`,
+      `/3d-demo?goal=${encodeURIComponent(cleanedGoal)}`,
     );
   };
 
@@ -69,8 +74,8 @@ export default function Home() {
             type="text"
             value={goal}
             onChange={(e) => {
-              if (!e.target.value.startsWith(PREFIX)) return;
               setGoal(e.target.value);
+              setUserHasEdited(true);
             }}
             onFocus={(e) => {
               setIsFocused(true);
@@ -84,7 +89,7 @@ export default function Home() {
           />
 
           {/* Animated suggestion (after prefix) */}
-          {goal === PREFIX && !isFocused && (
+          {goal === PREFIX && !isFocused && !userHasEdited && (
             <span
               className={`absolute left-[7rem] top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none transition-opacity duration-500 ${
                 fade ? "opacity-100" : "opacity-0"
@@ -97,7 +102,7 @@ export default function Home() {
           {/* Go Button - Inside input */}
           <button
             onClick={goTo3DDemo}
-            disabled={goal.trim() === PREFIX.trim()}
+            disabled={!goal.trim() || goal.trim() === PREFIX.trim()}
             className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center disabled:opacity-40 hover:bg-gray-500 transition-colors"
           >
             <svg 

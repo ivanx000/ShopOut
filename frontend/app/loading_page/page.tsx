@@ -106,7 +106,7 @@ function LoadingPageContent() {
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="text-center">
         <div className={`${rockSalt.className} animate-pulse text-4xl text-white`}>Loading recommendations...</div>
-        <div className="mt-4 text-lg text-white">Analyzing your vibe...</div>
+        <div className={`${rockSalt.className} mt-4 text-lg text-white`}>Analyzing your vibe...</div>
       </div>
     </div>
   );
