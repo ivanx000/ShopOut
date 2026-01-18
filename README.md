@@ -1,2 +1,256 @@
-# UofTHacks13
-You describe who you are and what you’re trying to be. AI will assemble the cart.
+# UofTHacks13 - Vibe-to-Product
+
+> Transform your aspirations into curated product recommendations with AI-powered personalization and 3D visualization.
+
+## 🎯 Overview
+
+Vibe-to-Product is an intelligent shopping assistant that understands your goals and lifestyle aspirations, then recommends products that align with your vision. Instead of searching for specific items, describe what you want to achieve — whether it's "feeling more settled in my apartment" or "hosting the best dinner parties" — and get personalized product suggestions powered by Google's Gemini AI.
+
+### Key Features
+
+- **🧠 Natural Language Understanding**: Describe your goals in plain language
+- **🎨 3D Product Visualization**: Interactive 3D models powered by Three.js and React Three Fiber
+- **📚 Persistent User Memory**: Learns from your preferences and interaction history
+- **🔍 Multi-Platform Search**: Aggregates products from Amazon, eBay, Google Shopping, and more
+- **🤖 AI-Powered Recommendations**: Leverages Gemini 2.5 Flash Lite for intelligent product matching
+- **📊 Cached Responses**: Smart caching system to optimize API usage and performance
+
+## 🏗️ Architecture
+
+### Backend (FastAPI + Python)
+- **FastAPI** REST API with CORS support
+- **Google Gemini AI** for natural language processing and recommendations
+- **SQLite** database for user memory and interaction history
+- **Multi-platform product search** with intelligent caching
+- **Structured logging** for AI decision tracking
+
+### Frontend (Next.js + TypeScript)
+- **Next.js 16** with App Router
+- **React Three Fiber** for 3D rendering
+- **Tailwind CSS** for styling
+- **TypeScript** for type safety
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python 3.8+
+- Node.js 18+ and npm
+- Google Gemini API key
+- (Optional) RapidAPI, SerpAPI, eBay API keys for extended product search
+
+### Backend Setup
+
+1. **Navigate to the backend directory:**
+   ```bash
+   cd backend
+   ```
+
+2. **Create a virtual environment (recommended):**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set up environment variables:**
+   Create a `.env` file in the `backend` directory:
+   ```env
+   GEMINI_API_KEY=your_gemini_api_key_here
+   SERPAPI_KEY=your_serpapi_key_here    # Optional
+   ```
+
+5. **Run the backend server:**
+   ```bash
+   uvicorn main:app --reload --port 8000
+   ```
+
+   The API will be available at `http://localhost:8000`
+
+### Frontend Setup
+
+1. **Navigate to the frontend directory:**
+   ```bash
+   cd frontend
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Build for production:**
+   ```bash
+   npm run build
+   npm start
+   ```
+
+## 📡 API Endpoints
+
+### Main Endpoints
+
+- **`POST /recommend`** - Get AI product recommendations based on vibe
+  ```json
+  {
+    "vibe": "I want to feel more confident at work",
+    "user_preference": "eco-friendly products, budget under $50",
+    "user_id": "user_123"
+  }
+  ```
+
+- **`POST /search-products`** - Search for specific products across platforms
+  ```json
+  {
+    "keyword": "ergonomic office chair",
+    "max_results": 10
+  }
+  ```
+
+- **`POST /suggest-vibe`** - Get personalized vibe suggestions based on history
+  ```json
+  {
+    "user_id": "user_123"
+  }
+  ```
+
+- **`GET /user/{user_id}/history`** - Retrieve user's recommendation history
+
+- **`GET /stats`** - Get memory database statistics
+
+- **`GET /logs/recent`** - View recent AI decision logs
+
+## 🎨 Features Deep Dive
+
+### User Memory System
+The application maintains a persistent memory of:
+- User preferences and constraints (budget, style, values)
+- Interaction history with timestamps
+- Generated recommendations and their metadata
+- Shopping patterns and tendencies
+
+### Smart Product Search
+- **Caching**: Reduces API calls with 24-hour cache
+- **Multi-threading**: Parallel searches across platforms
+- **Fallback mechanisms**: Graceful degradation if APIs fail
+- **Result aggregation**: Combines and deduplicates from multiple sources
+
+### AI-Powered Recommendations
+- Context-aware suggestions based on user goals
+- Learns from past interactions
+- Considers explicit preferences (budget, style, values)
+- Generates creative product combinations
+
+### 3D Visualization
+- Interactive 3D product models
+- Smooth animations and transitions
+- Responsive camera controls
+- Custom models for various product types
+
+## 🛠️ Tech Stack
+
+### Backend
+- **FastAPI** - Modern, fast web framework
+- **Google Generative AI** - Gemini 2.5 Flash Lite
+- **SQLite** - Lightweight database for user memory
+- **Pydantic** - Data validation
+- **python-dotenv** - Environment management
+- **requests** - HTTP client for product APIs
+
+### Frontend
+- **Next.js 16** - React framework with App Router
+- **React 19** - UI library
+- **TypeScript** - Type safety
+- **Three.js** - 3D graphics library
+- **React Three Fiber** - React renderer for Three.js
+- **@react-three/drei** - Helper components
+- **Tailwind CSS** - Utility-first CSS framework
+
+## 📁 Project Structure
+
+```
+UofTHacks13/
+├── backend/
+│   ├── main.py                 # FastAPI application entry point
+│   ├── product_search.py       # Multi-platform product search
+│   ├── user_memory.py          # User memory management
+│   ├── ai_logger.py            # AI decision logging
+│   ├── requirements.txt        # Python dependencies
+│   ├── cache/                  # Product search cache
+│   └── __pycache__/
+├── frontend/
+│   ├── app/
+│   │   ├── page.tsx            # Landing page
+│   │   ├── layout.tsx          # Root layout
+│   │   ├── globals.css         # Global styles
+│   │   ├── 3d-demo/            # 3D visualization demo
+│   │   ├── loading_page/       # Loading state
+│   │   ├── prompt_results/     # Results display
+│   │   └── suggested_products/ # Product cards
+│   ├── components/
+│   │   ├── 3d/                 # 3D components (Scene, Models)
+│   │   └── suggested_product_card/
+│   ├── lib/
+│   │   └── api.ts              # API client
+│   ├── public/
+│   │   └── models/             # 3D model files
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── next.config.ts
+├── README.md
+└── LICENSE
+```
+
+## 🎓 Use Cases
+
+- **Lifestyle Shopping**: "I want to feel more settled in my apartment"
+- **Hobby Development**: "I want to get back into creative habits"
+- **Social Goals**: "I want to host the best dinner parties"
+- **Personal Growth**: "I want to feel more confident at work"
+- **Home Improvement**: "I want to create a cozy reading nook"
+
+## 🐛 Troubleshooting
+
+### Backend Issues
+
+**Port already in use:**
+```bash
+# Kill process on port 8000
+lsof -ti:8000 | xargs kill -9
+```
+
+**Missing API keys:**
+- Ensure `.env` file exists in `backend/` directory
+- Verify `GEMINI_API_KEY` is set correctly
+- Optional API keys can be left empty (graceful fallback)
+
+### Frontend Issues
+
+**Module not found errors:**
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+**3D models not loading:**
+- Verify model files exist in `public/models/`
+- Check browser console for CORS or path errors
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🏆 Built For
+
+**UofTHacks 13** - University of Toronto Hackathon
+
+## 👥 Contributing
+
+This project was created for UofTHacks13. If you'd like to contribute or use it as a starting point for your own project, feel free to fork and build upon it!
+
+---
+
+Made with ❤️ for UofTHacks13
