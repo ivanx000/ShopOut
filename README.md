@@ -1,4 +1,4 @@
-# UofTHacks13 - Vibe-to-Product
+# ShopOut - Shop For Outcomes
 
 > Transform your aspirations into curated product recommendations with AI-powered personalization and 3D visualization.
 
@@ -61,7 +61,7 @@ Vibe-to-Product is an intelligent shopping assistant that understands your goals
    Create a `.env` file in the `backend` directory:
    ```env
    GEMINI_API_KEY=your_gemini_api_key_here
-   SERPAPI_KEY=your_serpapi_key_here    # Optional
+   SERPAPI_KEY=your_serpapi_key_here   
    ```
 
 5. **Run the backend server:**
