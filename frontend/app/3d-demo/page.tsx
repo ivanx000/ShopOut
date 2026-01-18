@@ -79,7 +79,16 @@ function Scene({
   selectedIndex: number | null;
   onProductClick: (index: number) => void;
 }) {
-  // Scattered positions for models - fill the page with good spacing
+  // Safety check
+  if (!products || products.length === 0) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-2xl text-gray-900">No products available</div>
+      </div>
+    );
+  }
+
+  // Scattered positions for models (same z-depth for consistency)
   const positions: [number, number, number][] = [
     [-9, 3.5, 0],
     [6, -3, 0],
