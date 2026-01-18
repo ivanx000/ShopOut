@@ -60,10 +60,25 @@ export interface Product {
 export interface RecommendationResponse {
   vibe_analysis: string;
   products: Product[];
+  user_id?: string;
+  mode?: string;
 }
 
-export async function getRecommendations(vibe: string): Promise<RecommendationResponse> {
-  const cacheKey = getCacheKey('recommend', { vibe });
+// User ID management
+function getUserId(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('user_id');
+}
+
+function saveUserId(userId: string): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('user_id', userId);
+  console.log('Saved user_id to localStorage:', userId);
+}
+
+export async function getRecommendations(vibe: string, userPreference?: string): Promise<RecommendationResponse> {
+  const userId = getUserId();
+  const cacheKey = getCacheKey('recommend', { vibe, userId });
   
   // Check cache first
   const cached = getFromCache<RecommendationResponse>(cacheKey);
@@ -72,14 +87,19 @@ export async function getRecommendations(vibe: string): Promise<RecommendationRe
     return cached;
   }
   
-  console.log(`Making API call to ${API_BASE_URL}/recommend with vibe:`, vibe);
+  console.log(`Making API call to ${API_BASE_URL}/recommend with vibe:`, vibe, 'user_id:', userId);
+  
+  const requestBody: any = { vibe };
+  if (userId) requestBody.user_id = userId;
+  if (userPreference) requestBody.user_preference = userPreference;
   
   const response = await fetch(`${API_BASE_URL}/recommend`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ vibe }),
+    credentials: 'include', // Include cookies
+    body: JSON.stringify(requestBody),
   });
 
   console.log("API response status:", response.status);
@@ -92,6 +112,11 @@ export async function getRecommendations(vibe: string): Promise<RecommendationRe
 
   const data = await response.json();
   console.log("API response data:", data);
+  
+  // Save user_id if returned
+  if (data.user_id) {
+    saveUserId(data.user_id);
+  }
   
   // Save to cache
   saveToCache(cacheKey, data);
