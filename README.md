@@ -16,6 +16,11 @@ E-commerce assumes identity is static — you’re a ‘type of customer,’ and
 - **🤖 AI-Powered Recommendations**: Leverages Gemini 2.5 Flash Lite for intelligent product matching
 - **📊 Cached Responses**: Smart caching system to optimize API usage and performance
 
+### Future Plans
+- 3D Model Library/Generation: Scale the collection to have a 3D model show up for any recommended product!
+- Merchant-facing dashboard: For analytics, including what inputs prompt their products, revenue from ShopOut, adjacent products, and more
+- User input filters
+  
 ## 🏗️ Architecture
 
 ### Backend (FastAPI + Python)
@@ -221,11 +226,6 @@ npm install
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-### Future Plans
-- 3D Model Library/Generation: Scale the collection to have a 3D model show up for any recommended product!
-- Merchant-facing dashboard: For analytics, including what inputs prompt their products, revenue from ShopOut, adjacent products, and more
-- User input filters
 
 
 ## 🏆 Built For
