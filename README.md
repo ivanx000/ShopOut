@@ -2,7 +2,7 @@
 
 > Transform your aspirations into curated product recommendations with AI-powered personalization and 3D visualization.
 
-## 🎯 Overview
+## 🎯 Overview [View Demo]([url](https://youtu.be/gfl9y90w_Eg?si=eszwlpBvqV55NjfR))
 
 E-commerce assumes identity is static — you’re a ‘type of customer,’ and sometimes you are, knowing exactly what you want. But people often shop during moments of transition, novelty, and goal setting: moving, changing jobs, picking up hobbies, and building new habits, when they might not know exactly what they need. Instead of searching for specific items, describe what you want to achieve — whether it's "feeling more settled in my apartment" or "hosting the best dinner parties" — and get personalized product suggestions from ShopOut with beautiful 3D product visuals. Powered by Google's Gemini AI.
 
