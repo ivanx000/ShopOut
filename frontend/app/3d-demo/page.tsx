@@ -9,7 +9,8 @@ import Product3DModel from "@/components/3d/Product3DModel";
 // Product 3D Component
 function Product3D({ 
   position, 
-  productName, 
+  productName,
+  productReason,
   isSelected, 
   onClick,
   color,
@@ -19,6 +20,7 @@ function Product3D({
 }: { 
   position: [number, number, number];
   productName: string;
+  productReason: string;
   isSelected: boolean;
   onClick: () => void;
   color: string;
@@ -35,18 +37,34 @@ function Product3D({
         scale={scale}
         offset={offset}
       />
-      <Text
-        position={[0, -1.5, 0]}
-        fontSize={0.2}
-        color="black"
-        anchorX="center"
-        anchorY="middle"
-        maxWidth={2}
-        outlineWidth={0.02}
-        outlineColor="white"
-      >
-        {productName}
-      </Text>
+      {!isSelected && (
+        <>
+          <Text
+            position={[0, -1.5, 0]}
+            fontSize={0.22}
+            color="black"
+            anchorX="center"
+            anchorY="middle"
+            maxWidth={3}
+            outlineWidth={0.04}
+            outlineColor="white"
+          >
+            {productName}
+          </Text>
+          <Text
+            position={[0, -2.2, 0]}
+            fontSize={0.13}
+            color="black"
+            anchorX="center"
+            anchorY="middle"
+            maxWidth={4}
+            outlineWidth={0.01}
+            outlineColor="white"
+          >
+            {productReason}
+          </Text>
+        </>
+      )}
     </group>
   );
 }
@@ -57,7 +75,7 @@ function Scene({
   selectedIndex, 
   onProductClick 
 }: { 
-  products: { name: string; category: string }[];
+  products: { name: string; reason: string; category: string }[];
   selectedIndex: number | null;
   onProductClick: (index: number) => void;
 }) {
@@ -72,11 +90,11 @@ function Scene({
 
   // Scattered positions for models (same z-depth for consistency)
   const positions: [number, number, number][] = [
-    [-6, 2, 0],
-    [3.5, -2.5, 0],
-    [-2, 3.5, 0],
-    [5.5, 1.5, 0],
-    [-4, -2, 0],
+    [-9, 3.5, 0],
+    [6, -3, 0],
+    [-1.5, 4.5, 0],
+    [8, 2.5, 0],
+    [-6, -3.5, 0],
   ];
 
   const colors = ["#ff6b6b", "#4ecdc4", "#45b7d1", "#f9ca24", "#6c5ce7"];
@@ -85,7 +103,7 @@ function Scene({
   const modelFiles = ["candle.obj", "diffuser.obj", "journal.obj", "pillow.obj", "tea.obj"];
   
   // Adjust scales for each model - larger fixed sizes
-  const scales = [0.020, 0.016, 0.018, 0.006, 0.016]; // candle, diffuser, journal, pillow, tea  
+  const scales = [0.020, 0.013, 0.018, 0.006, 0.013]; // candle, diffuser, journal, pillow, tea  
   // Adjust offsets to center rotation for each model [x, y, z]
   const offsets: [number, number, number][] = [
     [0, 0, 0],     // candle
@@ -97,7 +115,7 @@ function Scene({
   return (
     <Canvas 
       key={`canvas-${selectedIndex}`}
-      camera={{ position: selectedIndex !== null ? [0, 0, 6] : [0, 0, 12], fov: selectedIndex !== null ? 50 : 50 }}
+      camera={{ position: selectedIndex !== null ? [0, 0, 6] : [0, 0, 14], fov: selectedIndex !== null ? 50 : 50 }}
       gl={{ alpha: true }}
       style={{ background: 'transparent' }}
     >
@@ -119,6 +137,7 @@ function Scene({
             key={index}
             position={position}
             productName={product.name}
+            productReason={product.reason}
             isSelected={isSelected}
             onClick={() => onProductClick(index)}
             color={colors[index % colors.length]}
@@ -237,7 +256,7 @@ function ThreeDDemoContent() {
                       />
                     )}
                     <h2 className="font-bold text-xl mb-3 text-gray-900 text-center line-clamp-2">{selectedProductDetail.title}</h2>
-                    <p className="text-gray-900 font-bold text-3xl mb-4">
+                    <p className="text-gray-900 font-bold text-4xl mb-4">
                       ${selectedProductDetail.price.toFixed(2)}
                     </p>
                     
